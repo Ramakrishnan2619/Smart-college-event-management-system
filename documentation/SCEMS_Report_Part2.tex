@@ -1,0 +1,365 @@
+% =============================================
+% SCEMS REPORT - CHAPTERS 3 & 4
+% Paste this content BEFORE \end{document} in Part 1
+% =============================================
+
+% =============================================
+% CHAPTER 3: FRAMEWORK DESCRIPTION
+% =============================================
+\chapter{FRAMEWORK DESCRIPTION}
+
+\section{Frontend Implementation}
+
+\subsection{Environment Setup}
+The frontend of SCEMS is built as a Single Page Application (SPA) using React.js version 18, bootstrapped with the Vite build tool. The development environment requires Node.js (version 18 or higher) and npm (Node Package Manager) as prerequisites. The project was initialized using the following command:
+
+\begin{lstlisting}[language=bash, caption={Frontend Project Initialization}]
+npx create-vite@latest scems-frontend --template react
+cd scems-frontend
+npm install
+\end{lstlisting}
+
+The following additional dependencies were installed to support the system's feature requirements:
+
+\begin{lstlisting}[language=bash, caption={Frontend Dependency Installation}]
+npm install react-router-dom axios framer-motion
+npm install lucide-react react-hot-toast recharts
+npm install react-leaflet leaflet
+\end{lstlisting}
+
+Each dependency serves a specific architectural purpose: \texttt{react-router-dom} provides client-side routing for the SPA; \texttt{axios} standardizes HTTP communication with the backend API; \texttt{framer-motion} enables declarative animations; \texttt{lucide-react} provides a consistent icon library; \texttt{react-hot-toast} manages non-blocking notification popups; \texttt{recharts} powers the admin analytics charts; and \texttt{react-leaflet} with \texttt{leaflet} enables interactive venue mapping.
+
+\subsection{Structure of the Project}
+The frontend codebase follows a feature-based directory structure that promotes modularity and maintainability:
+
+\begin{lstlisting}[caption={Frontend Directory Structure}]
+src/
+|-- api/            # Axios instance and API service functions
+|   |-- axios.js    # Base Axios configuration with interceptors
+|   |-- events.js   # Event-related API calls
+|   |-- registrations.js  # Registration API calls
+|-- components/     # Reusable UI components
+|   |-- Navbar.jsx  # Global navigation bar
+|   |-- Chatbot.jsx # AI support chatbot
+|   |-- AdminSidebar.jsx  # Admin panel sidebar
+|   |-- ProtectedRoute.jsx # Route guard component
+|-- context/        # React Context providers
+|   |-- AuthContext.jsx  # Authentication state
+|   |-- CartContext.jsx  # Shopping cart state
+|   |-- ThemeContext.jsx # Dark/Light theme toggle
+|-- pages/          # Page-level components
+|   |-- Landing.jsx      # Home page
+|   |-- EventDetail.jsx  # Individual event view
+|   |-- Checkout.jsx     # Payment simulation
+|   |-- AdminPanel.jsx   # Admin dashboard
+|   |-- StudentDashboard.jsx # Student portal
+|-- data/           # Static mock data
+|   |-- mockData.js # Categories, departments
+|-- App.jsx         # Root component with routing
+|-- main.jsx        # Application entry point
+\end{lstlisting}
+
+\subsection{Execution Procedure}
+To launch the frontend development server, the following command is executed from the project root directory:
+
+\begin{lstlisting}[language=bash, caption={Frontend Execution}]
+npm run dev
+# or explicitly:
+npx vite --port 5174 --host
+\end{lstlisting}
+
+The Vite development server starts on \texttt{http://localhost:5174} with Hot Module Replacement (HMR) enabled, providing sub-second feedback during development. The \texttt{--host} flag exposes the server on the local network, enabling mobile device testing via QR code scanning.
+
+\section{Backend Implementation}
+
+\subsection{Environment Setup}
+The backend is built using Spring Boot version 3.2 with Java 26. The project was initialized using Spring Initializr with the following dependencies: Spring Web, Spring Data JPA, H2 Database, and Validation. The Maven Wrapper (\texttt{mvnw}) is included to ensure consistent build environments across different developer machines.
+
+\begin{lstlisting}[language=bash, caption={Backend Execution}]
+# Set Java Home
+set JAVA_HOME=C:\Program Files\Java\jdk-26
+
+# Run the application
+.\mvnw.cmd spring-boot:run
+\end{lstlisting}
+
+The Spring Boot application starts an embedded Tomcat server on \texttt{http://localhost:8080}. CORS is configured to accept requests from the frontend origins (ports 5173, 5174, and 3000).
+
+\subsection{Structure of the Project}
+The backend follows the standard Spring Boot convention of separating concerns into distinct packages:
+
+\begin{lstlisting}[caption={Backend Directory Structure}]
+backend/src/main/java/com/scems/
+|-- config/
+|   |-- DataSeeder.java       # Database initialization
+|   |-- WebConfig.java        # CORS configuration
+|-- controller/
+|   |-- EventController.java  # /api/events endpoints
+|   |-- RegistrationController.java  # /api/registrations
+|   |-- AuthController.java   # /api/auth endpoints
+|   |-- PaymentController.java # /api/payments endpoints
+|-- model/
+|   |-- Event.java            # Event JPA entity
+|   |-- Registration.java     # Registration JPA entity
+|   |-- User.java             # User JPA entity
+|   |-- Category.java         # Category JPA entity
+|-- repository/
+|   |-- EventRepository.java       # Event data access
+|   |-- RegistrationRepository.java # Registration data access
+|   |-- UserRepository.java        # User data access
+|   |-- CategoryRepository.java    # Category data access
+\end{lstlisting}
+
+\subsection{Execution Procedure}
+The backend application is executed via the Maven Wrapper. On startup, the \texttt{DataSeeder} component automatically populates the H2 database with 25 sample events across 16 categories, 2 user accounts (1 admin, 1 student), and 8 sample registrations. This ensures that the application launches with a rich demonstration dataset without requiring manual database configuration.
+
+\section{Database Implementation}
+
+\subsection{Database Configuration}
+The H2 in-memory database is configured in \texttt{application.properties} with MySQL compatibility mode enabled:
+
+\begin{lstlisting}[caption={Database Configuration (application.properties)}]
+spring.datasource.url=jdbc:h2:mem:scemsdb;MODE=MySQL
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+\end{lstlisting}
+
+The \texttt{create-drop} strategy ensures a clean database state on each application restart, which is ideal for development and demonstration purposes. The H2 Console is accessible at \texttt{http://localhost:8080/h2-console} for direct SQL query execution during debugging.
+
+\subsection{Schema Structure}
+The database schema follows third normal form (3NF) to minimize data redundancy. Primary keys are auto-generated using the \texttt{IDENTITY} strategy, while business-level identifiers (e.g., \texttt{eventId}, \texttt{registrationId}) are stored as unique string columns for human-readable referencing.
+
+\subsection{Tables Created}
+
+\begin{table}[H]
+\centering
+\caption{Users Table Schema}
+\label{tab:users_schema}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Description} \\
+\hline
+id (PK) & VARCHAR & Unique user identifier (e.g., A001, S001) \\
+\hline
+name & VARCHAR & Full name of the user \\
+\hline
+username & VARCHAR & Login username \\
+\hline
+password & VARCHAR & Hashed password \\
+\hline
+email & VARCHAR & Institutional email address \\
+\hline
+role & VARCHAR & User role (admin/student) \\
+\hline
+department & VARCHAR & Academic department \\
+\hline
+rollNo & VARCHAR & Student roll number (nullable) \\
+\hline
+year & INTEGER & Academic year (nullable) \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Events Table Schema}
+\label{tab:events_schema}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Description} \\
+\hline
+id (PK) & BIGINT & Auto-generated primary key \\
+\hline
+eventId & VARCHAR & Unique business identifier (e.g., evt-001) \\
+\hline
+title & VARCHAR & Event title \\
+\hline
+categoryId & VARCHAR & FK to category (e.g., technical) \\
+\hline
+department & VARCHAR & Organizing department \\
+\hline
+date & VARCHAR & Event date (YYYY-MM-DD) \\
+\hline
+time & VARCHAR & Event start time \\
+\hline
+venue & VARCHAR & Physical location \\
+\hline
+duration & VARCHAR & Duration (e.g., 6 hours) \\
+\hline
+maxSeats & INTEGER & Maximum capacity \\
+\hline
+registeredCount & INTEGER & Current registrations \\
+\hline
+description & TEXT & Detailed description \\
+\hline
+bannerColor & VARCHAR & Hex color for UI theming \\
+\hline
+isTrending & BOOLEAN & Trending flag for homepage \\
+\hline
+tags & VARCHAR & Comma-separated search tags \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Registrations Table Schema}
+\label{tab:registrations_schema}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Description} \\
+\hline
+id (PK) & BIGINT & Auto-generated primary key \\
+\hline
+registrationId & VARCHAR & Unique business identifier \\
+\hline
+eventId & VARCHAR & FK to event \\
+\hline
+studentId & VARCHAR & FK to user \\
+\hline
+status & VARCHAR & upcoming / completed / cancelled \\
+\hline
+registeredOn & VARCHAR & Registration date \\
+\hline
+paymentId & VARCHAR & Transaction reference \\
+\hline
+amountPaid & DOUBLE & Payment amount \\
+\hline
+feedbackRating & INTEGER & 1--5 star rating (nullable) \\
+\hline
+feedbackComment & TEXT & Written feedback (nullable) \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{System Technology Stack Overview}
+
+\begin{figure}[H]
+\centering
+% Replace with your actual architecture diagram
+\fbox{\parbox{12cm}{\centering \vspace{3cm} \textbf{[INSERT: System Architecture Diagram]} \\ \textit{React Frontend $\longleftrightarrow$ Spring Boot API $\longleftrightarrow$ H2 Database} \vspace{3cm}}}
+\caption{SCEMS 3-Tier System Architecture}
+\label{fig:system_arch}
+\end{figure}
+
+% =============================================
+% CHAPTER 4: METHODOLOGIES
+% =============================================
+\chapter{METHODOLOGIES}
+
+\section{Project Architecture}
+
+SCEMS employs a \textbf{3-Tier Decoupled Architecture} that separates concerns across three independent layers, each deployable and scalable independently.
+
+\textbf{Tier 1 --- Presentation Layer (React.js SPA):}
+The frontend operates as a completely independent Single Page Application. It communicates with the backend exclusively through HTTP REST calls using the Axios library. All routing is handled client-side using React Router DOM, ensuring zero page reloads during navigation. The presentation layer manages its own local state through React's Context API, maintaining three global state providers:
+\begin{itemize}
+    \item \textbf{AuthContext:} Manages user authentication state, role information, and session persistence across browser refreshes using \texttt{localStorage}.
+    \item \textbf{CartContext:} Handles the shopping cart logic, including add/remove operations, quantity management, total calculation, and persistent storage.
+    \item \textbf{ThemeContext:} Controls the application-wide dark/light mode toggle, applying CSS custom properties dynamically.
+\end{itemize}
+
+\textbf{Tier 2 --- Application Layer (Spring Boot REST API):}
+The backend processes all business logic, including input validation, capacity checks (preventing over-registration), and data enrichment (attaching event details to registration records). Each controller exposes a set of RESTful endpoints following standard HTTP semantics: GET for retrieval, POST for creation, PUT for updates, and DELETE for removal. The backend also hosts the payment status polling mechanism---a concurrent HashMap that acts as a temporary in-memory store for transaction states during the QR payment flow.
+
+\textbf{Tier 3 --- Data Layer (H2 Database):}
+The persistence layer stores all structured data using JPA entities mapped to relational tables. Spring Data JPA repositories provide a clean abstraction over SQL queries, enabling the application to perform complex operations (e.g., searching events by title substring) through simple method naming conventions like \texttt{findByTitleContainingIgnoreCase()}.
+
+\section{DataFlow Diagram (DFD)}
+
+\subsection{DFD Level 0: Context Diagram}
+The Level 0 DFD represents the system as a single process interacting with two external entities: \textbf{Student} and \textbf{Administrator}.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{12cm}{\centering \vspace{2cm}
+\textbf{Student} $\xrightarrow{\text{Registration Request}}$ \textbf{SCEMS} $\xrightarrow{\text{Confirmation}}$ \textbf{Student} \\[0.5cm]
+\textbf{Admin} $\xrightarrow{\text{Event Data}}$ \textbf{SCEMS} $\xrightarrow{\text{Analytics}}$ \textbf{Admin}
+\vspace{2cm}}}
+\caption{DFD Level 0: Context Diagram}
+\label{fig:dfd0}
+\end{figure}
+
+\subsection{DFD Level 1: Functional Decomposition}
+The Level 1 DFD decomposes SCEMS into its core functional processes:
+
+\begin{enumerate}
+    \item \textbf{P1 --- Authentication Process:} Validates user credentials against the Users table and returns role-based session data.
+    \item \textbf{P2 --- Event Management Process:} Handles CRUD operations on the Events table, triggered by administrator actions.
+    \item \textbf{P3 --- Discovery Process:} Serves event listings with search, filter, and sort capabilities to student clients.
+    \item \textbf{P4 --- Registration Process:} Processes cart checkout, creates Registration records, and updates seat counts.
+    \item \textbf{P5 --- Payment Sync Process:} Manages the QR-based cross-device payment flow using transaction status polling.
+    \item \textbf{P6 --- Analytics Process:} Aggregates registration data into chart-ready formats for the admin dashboard.
+    \item \textbf{P7 --- Chatbot Process:} Handles student queries through keyword matching and returns pre-configured responses.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{12cm}{\centering \vspace{3cm} \textbf{[INSERT: DFD Level 1 Diagram]} \vspace{3cm}}}
+\caption{DFD Level 1: Functional Decomposition}
+\label{fig:dfd1}
+\end{figure}
+
+\section{System Modules and Functional Architecture}
+
+\subsection{Module 1: User Authentication and Security}
+The authentication module implements a role-based access control (RBAC) system with two predefined roles: \texttt{admin} and \texttt{student}. Upon successful login via \texttt{POST /api/auth/login}, the backend returns a user object containing role information, which the frontend stores in \texttt{AuthContext}. Protected routes are guarded by a \texttt{ProtectedRoute} component that checks for valid authentication state before rendering child components. Unauthorized access attempts are redirected to the login page with a toast notification.
+
+\subsection{Module 2: Event Discovery Engine}
+The discovery engine is the primary student-facing module. It fetches all events from \texttt{GET /api/events} on component mount and applies client-side filtering using React's \texttt{useMemo} hook for optimal performance. The module supports three simultaneous filter dimensions: keyword search (matching against title and tags), department filter, and category filter. Results are dynamically sorted by date, popularity (registration count), or seat availability. Each event card displays critical metadata including title, date, venue, category badge, registration progress bar, and trending indicator.
+
+\subsection{Module 3: Cart and Checkout System}
+The cart module implements a multi-event registration workflow inspired by e-commerce platforms. The \texttt{CartContext} provider exposes \texttt{addToCart()}, \texttt{removeFromCart()}, and \texttt{clearCart()} methods to all child components. Cart state is serialized to \texttt{localStorage} on every update, ensuring persistence across browser refreshes. The checkout page calculates a registration fee per event (simulated at \rupee149 per event) and displays the total. Upon proceeding to payment, a unique Transaction ID is generated and the QR payment flow begins.
+
+\subsection{Module 4: Real-Time QR Payment Synchronization}
+This module implements the most technically advanced feature of SCEMS. The payment flow follows a Producer-Consumer Polling Pattern:
+\begin{enumerate}
+    \item The Desktop client generates a unique \texttt{txnId} and registers it with the backend via \texttt{POST /api/payments/initiate}.
+    \item The backend stores the transaction with status \texttt{PENDING} in a concurrent HashMap.
+    \item The Desktop displays a QR code (generated via the QR Server API) encoding the URL \texttt{http://[IP]:5174/mobile-pay/\{txnId\}}.
+    \item The Desktop begins polling \texttt{GET /api/payments/status/\{txnId\}} every 2 seconds using \texttt{setInterval}.
+    \item The student scans the QR code on their mobile device, which opens the mobile payment page.
+    \item The mobile page sends \texttt{POST /api/payments/success/\{txnId\}} to the backend.
+    \item The backend updates the transaction status to \texttt{SUCCESS}.
+    \item The next Desktop poll detects the status change and completes the checkout by creating registration records.
+\end{enumerate}
+
+\subsection{Module 5: AI Support Chatbot}
+The chatbot module provides automated student support using a client-side keyword matching algorithm. The implementation consists of a floating action button (FAB) that expands into a chat interface with message history. When the student types a query, the input is tokenized and compared against a dictionary of intent keys (e.g., ``register'', ``refund'', ``cancel'', ``location'', ``fee''). Matching queries receive pre-configured responses with a simulated 1.5-second typing delay for natural interaction feel. Quick-reply buttons provide one-tap access to the most common questions.
+
+\subsection{Module 6: Administrative Dashboard and Analytics}
+The admin panel provides a comprehensive management interface with four functional tabs:
+\begin{itemize}
+    \item \textbf{Dashboard Tab:} Displays summary statistics (total events, total registrations, departments, average rating) and a recent activity feed showing the latest registrations.
+    \item \textbf{Events Tab:} A full CRUD interface with search, department filter, and category filter. Each event row provides edit and delete actions.
+    \item \textbf{Registrations Tab:} Displays per-event registration lists with student details, status badges, and feedback ratings. Includes Excel export functionality.
+    \item \textbf{Analytics Tab:} Interactive Recharts-based visualizations including an Area Chart for registration trends and a Pie Chart for department-wise distribution.
+\end{itemize}
+
+\subsection{Module 7: Interactive Venue Mapping}
+The venue mapping module integrates Leaflet.js with OpenStreetMap tile servers to display event locations on interactive maps. Each Event Detail page renders a map component centered on the venue coordinates with a marker and popup label. This feature helps students navigate to unfamiliar locations on campus, particularly benefiting first-year students.
+
+\section{Advantages and Limitations of the Project}
+
+\subsection{Advantages}
+\begin{enumerate}
+    \item \textbf{Unified Platform:} Eliminates data silos by centralizing all event information across departments into a single application.
+    \item \textbf{Zero Infrastructure Cost:} The H2 in-memory database and embedded Tomcat server eliminate the need for external database hosting during development.
+    \item \textbf{Real-Time Engagement:} The QR payment sync and AI chatbot provide interactive experiences that keep students engaged.
+    \item \textbf{Scalable Architecture:} The decoupled 3-tier design allows independent scaling of frontend, backend, and database tiers.
+    \item \textbf{Premium UI/UX:} The Glassmorphism design language and Framer Motion animations create an experience that rivals commercial platforms.
+    \item \textbf{Data Export:} Administrators can export registration data to Excel format for offline reporting and accreditation documentation.
+\end{enumerate}
+
+\subsection{Limitations}
+\begin{enumerate}
+    \item \textbf{In-Memory Persistence:} The H2 database loses all data on application restart. A migration to MySQL/PostgreSQL is required for production use.
+    \item \textbf{No Real Payments:} The payment flow is a simulation; actual financial transactions require integration with licensed payment gateways.
+    \item \textbf{No Push Notifications:} Students must manually check the platform for updates; real-time push notifications via Firebase Cloud Messaging are not yet implemented.
+    \item \textbf{Single-Instance Deployment:} The current architecture does not support horizontal scaling or load balancing across multiple server instances.
+    \item \textbf{No Email/SMS OTP:} Authentication relies on username/password without multi-factor verification.
+\end{enumerate}
