@@ -24,7 +24,7 @@ import Checkout from './pages/Checkout';
 import Receipt from './pages/Receipt';
 import MobilePayment from './pages/MobilePayment';
 import Inbox from './pages/Inbox';
-import ChatBot from './components/Chatbot';
+import ChatBot from './components/ChatBot';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
